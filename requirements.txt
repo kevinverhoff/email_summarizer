@@ -2,6 +2,6 @@ pandas
 pywin32
 transformers
 torch
-plyer
+winotify
 SentencePiece
 hf_xet
