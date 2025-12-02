@@ -1,0 +1,5 @@
+pandas
+pywin32
+transformers
+torch
+plyer
