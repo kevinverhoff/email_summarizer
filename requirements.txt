@@ -3,3 +3,5 @@ pywin32
 transformers
 torch
 plyer
+SentencePiece
+hf_xet
