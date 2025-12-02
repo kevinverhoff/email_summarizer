@@ -7,7 +7,7 @@ from tkinter import messagebox
 from transformers import T5ForConditionalGeneration, T5Tokenizer, pipeline
 
 
-VIP_FILE = "vip_list.csv"               # stored in repo
+VIP_FILE = "vip_list.csv"
 SUMMARY_OUTPUT = os.path.expanduser("~/Desktop/email_summary.txt")
 
 ### ------------------------------------------------------------
@@ -31,8 +31,6 @@ def connect_classic_outlook():
     # CLSID of Classic Outlook.Application
     CLASSIC_OUTLOOK_CLSID = "{0006F03A-0000-0000-C000-000000000046}"
     return win32com.client.Dispatch(CLASSIC_OUTLOOK_CLSID)
-
-
 
 def get_outlook_emails():
     outlook_app = connect_classic_outlook()
