@@ -2,8 +2,6 @@ import os
 import csv
 import win32com.client
 import pythoncom
-import tkinter as tk
-from tkinter import messagebox
 from transformers import T5ForConditionalGeneration, T5Tokenizer, pipeline
 
 
@@ -80,6 +78,26 @@ def summarize_email(summarizer, body):
 ### ------------------------------------------------------------
 ### 5. Process + Tag Emails
 ### ------------------------------------------------------------
+def archive_email(msg):
+    try:
+        outlook_app = connect_classic_outlook()
+        outlook = outlook_app.GetNamespace("MAPI")
+
+        # Default Archive folder (Outlook auto-archive folder)
+        archive_folder = outlook.GetDefaultFolder(32)  # 32 = Archive
+
+        # Append text to subject before archiving
+        try:
+            msg.Subject = f"{msg.Subject} ~THIS EMAIL WAS AUTO-ARCHIVED~"
+        except:
+            pass  # If Outlook blocks subject edits on some meeting items
+
+        # Move the email
+        msg.Move(archive_folder)
+
+    except Exception as e:
+        print("Error archiving email:", e)
+
 def safe_get(field):
     try:
         return field if field else "missing"
@@ -117,6 +135,12 @@ def process_emails():
                 subject = safe_get(msg.Subject)
                 body = safe_get(msg.Body)
                 to = safe_get(msg.ReplyRecipients)
+
+                try:
+                    if subject.strip().startswith("Accepted"):
+                        archive_email(msg)
+                except:
+                    pass
 
                 summary = summarize_email(summarizer, body)
 
@@ -177,9 +201,9 @@ def write_summary(vip, zendesk, meetings, other):
         def write_section(title, data):
             f.write(f"\n### {title} ###\n\n")
             for email in data:
+                f.write(f"SUBJECT: {email['subject']}\n")
                 f.write(f"FROM: {email['sender']}\n")
                 f.write(f"TO: {email['to']}\n")
-                f.write(f"SUBJECT: {email['subject']}\n")
                 f.write(f"SUMMARY: {email['summary']}\n")
                 f.write("-" * 40 + "\n")
 
@@ -192,16 +216,6 @@ def write_summary(vip, zendesk, meetings, other):
 
 
 ### ------------------------------------------------------------
-### 7. Pop-up Notification
-### ------------------------------------------------------------
-def notify():
-    root = tk.Tk()
-    root.withdraw()
-    messagebox.showinfo("Email Summary Complete", "Your email summary is ready.")
-    root.destroy()
-
-
-### ------------------------------------------------------------
 ### MAIN
 ### ------------------------------------------------------------
 if __name__ == "__main__":
@@ -209,4 +223,3 @@ if __name__ == "__main__":
     vip, zendesk, meetings, other = process_emails()
     print("Writing summary...")
     write_summary(vip, zendesk, meetings, other)
-    notify()
