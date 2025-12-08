@@ -59,12 +59,19 @@ def summarize_email(summarizer, body):
         return "(No content)"
 
     note = ""
-    truncated_body = body
+    EXTERNAL_WARNING = (
+    "This message has originated from an External Source. "
+    "Do not click links/attachments or respond to this email unless you recognize "
+    "the sender's email address and know that the content is safe."
+)
+
+    clean_body = body.replace(EXTERNAL_WARNING, "")
+    truncated_body = clean_body
 
     # If email body is too long
-    if len(body) > 2500:
+    if len(clean_body) > 2500:
         note = "Email too long. Showing summary of first 2500 characters. "
-        truncated_body = body[:2500]
+        truncated_body = clean_body[:2500]
 
     summary = summarizer(
         truncated_body,
